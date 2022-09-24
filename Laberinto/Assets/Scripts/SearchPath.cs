@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class SearchPath : MonoBehaviour
@@ -20,6 +18,8 @@ public class SearchPath : MonoBehaviour
     private Node _searchingPoint;                           // Current node we are searching
     private bool _isExploring = true;                       // If we are end then it is set to false
 
+    public long elapsedMs;// tiempo en Milisegundos
+
     private List<Node> _path = new List<Node>();            // For storing the path traversed
     public List<Node> Path {
         get
@@ -27,8 +27,12 @@ public class SearchPath : MonoBehaviour
             if (_path.Count == 0)                           // If we've already found path, no need to check it again
             {
                 LoadAllBlocks();
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 BFS();
+                watch.Stop();
+                elapsedMs = watch.ElapsedMilliseconds;
                 CreatePath();
+
             }
             return _path;
         }
@@ -45,7 +49,7 @@ public class SearchPath : MonoBehaviour
             // For checking if 2 nodes are in same position; i.e overlapping nodes
             if (_block.ContainsKey(gridPos))
             {
-                UnityEngine.Debug.LogWarning("2 Nodes present in same position. i.e nodes overlapped.");
+                Debug.LogWarning("2 Nodes present in same position. i.e nodes overlapped.");
             }
             else
             {
@@ -59,23 +63,12 @@ public class SearchPath : MonoBehaviour
     // BFS; For finding the shortest path
     private void BFS()
     {
-        Stopwatch stopWatch = new Stopwatch();
-        stopWatch.Start();
-
         _queue.Enqueue(_startingPoint);
         while (_queue.Count > 0 && _isExploring) {
             _searchingPoint = _queue.Dequeue();
             OnReachingEnd();
             ExploreNeighbourNodes();
         }
-
-        stopWatch.Stop();
-        TimeSpan ts = stopWatch.Elapsed;
-        string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-        ts.Hours, ts.Minutes, ts.Seconds,
-        ts.Milliseconds / 10);
-
-        UnityEngine.Debug.Log("RunTime " + elapsedTime);
     }
 
 
@@ -118,24 +111,34 @@ public class SearchPath : MonoBehaviour
     // Creating path using the isExploredFrom var of each node to get the previous node from where we got to this node
     public void CreatePath()
     {
+        
         SetPath(_endingPoint);
         Node previousNode = _endingPoint.isExploredFrom;
 
         while (previousNode != _startingPoint) {
             SetPath(previousNode);
             previousNode = previousNode.isExploredFrom;
+            
         }
 
         SetPath(_startingPoint);
         _path.Reverse();
         SetPathColor();
-        
+
+        foreach (var x in _path)
+        {
+            Debug.Log(x.ToString());
+        }
+
+
+
+
+
     }
 
     // For adding nodes to the path
     private void SetPath(Node node) {
         _path.Add(node);
-        UnityEngine.Debug.Log(_path, node);
     }
 
     // Setting color to nodes
