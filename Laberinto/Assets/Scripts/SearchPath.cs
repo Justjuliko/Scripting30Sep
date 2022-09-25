@@ -124,21 +124,13 @@ public class SearchPath : MonoBehaviour
         SetPath(_startingPoint);
         _path.Reverse();
         SetPathColor();
-
-        foreach (var x in _path)
-        {
-            Debug.Log(x.ToString());
-        }
-
-
-
-
-
     }
 
     // For adding nodes to the path
-    private void SetPath(Node node) {
+    private void SetPath(Node node)
+    {
         _path.Add(node);
+        UnityEngine.Debug.Log(_path, node);
     }
 
     // Setting color to nodes
